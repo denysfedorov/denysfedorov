@@ -275,6 +275,148 @@ BTC (Bitcoin): $67,432.18 via CoinGecko
 
 Non-USD currencies will skip providers that only support USD (CoinPaprika, CoinCap) and try the next one automatically.
 
+## Architecture
+
+### High-Level Flow
+
+```
+User runs crypto-price
+        │
+        ▼
+┌─────────────────┐     ┌──────────────────────┐
+│  Has arguments?  │─No─▶│  Interactive Mode     │
+│  (symbol given)  │     │  Prompt: coin,        │
+└───────┬─────────┘     │  currency, date       │
+        │ Yes            └──────────┬───────────┘
+        ▼                           │
+┌─────────────────┐                 │
+│  Resolve symbol  │◀───────────────┘
+│  btc → bitcoin   │
+└───────┬─────────┘
+        │
+        ▼
+┌─────────────────┐     ┌──────────────────────┐
+│  --compare flag? │─No─▶│  Fetch current price  │──▶ Display result
+└───────┬─────────┘     └──────────────────────┘
+        │ Yes
+        ▼
+┌─────────────────┐     ┌──────────────────────┐
+│  Parse date      │───▶│  Fetch current price   │
+│  + time/timezone │     │  + historical price   │
+└─────────────────┘     └──────────┬───────────┘
+                                   │
+                                   ▼
+                        ┌──────────────────────┐
+                        │  Calculate diff       │
+                        │  Format & render box  │
+                        └──────────────────────┘
+```
+
+### Mermaid Flowchart
+
+```mermaid
+flowchart TD
+    A([User runs crypto-price]) --> B{Arguments provided?}
+
+    B -- No --> C[Interactive Mode]
+    C --> C1[/Prompt: select coin/]
+    C1 --> C2[/Prompt: select currency/]
+    C2 --> C3{Compare with\npast date?}
+    C3 -- Yes --> C4[/Prompt: enter date/]
+    C4 --> D
+    C3 -- No --> D
+
+    B -- Yes --> D[Resolve coin symbol]
+
+    D --> E{Symbol valid?}
+    E -- No --> E1[Suggest closest match]
+    E1 --> E2([Exit with error])
+
+    E -- Yes --> F{--compare flag?}
+
+    F -- No --> G[Fetch current price]
+    G --> G1[Display: COIN: $price]
+    G1 --> Z
+
+    F -- Yes --> H[Parse date + time + timezone]
+    H --> I{Date valid?}
+    I -- No --> I1([Exit: Invalid date error])
+    I -- Yes --> J[Build UTC timestamp]
+    J --> K[Fetch current price]
+    K --> L[Fetch historical price]
+    L --> M[Calculate difference]
+    M --> N[Render comparison box]
+    N --> Z
+
+    Z{Interactive mode?}
+    Z -- Yes --> Z1{Check another coin?}
+    Z1 -- Yes --> C1
+    Z1 -- No --> Z2([Goodbye!])
+    Z -- No --> Z3([Done])
+
+    style A fill:#4CAF50,color:#fff
+    style E2 fill:#f44336,color:#fff
+    style I1 fill:#f44336,color:#fff
+    style Z2 fill:#607D8B,color:#fff
+    style Z3 fill:#607D8B,color:#fff
+```
+
+### Provider Fallback Chain
+
+```mermaid
+flowchart LR
+    A[API Request] --> P1[CoinGecko]
+    P1 -- Success --> R([Return result])
+    P1 -- "Fail (429/timeout/network)" --> P2[CoinPaprika]
+    P2 -- Success --> R
+    P2 -- Fail --> P3[CoinCap]
+    P3 -- Success --> R
+    P3 -- Fail --> P4[Binance]
+    P4 -- Success --> R
+    P4 -- Fail --> ERR([All providers failed])
+
+    style P1 fill:#8BC34A,color:#fff
+    style P2 fill:#FF9800,color:#fff
+    style P3 fill:#03A9F4,color:#fff
+    style P4 fill:#FFC107,color:#000
+    style R fill:#4CAF50,color:#fff
+    style ERR fill:#f44336,color:#fff
+```
+
+### Project Structure
+
+```
+crypto-cli/
+├── src/
+│   ├── index.ts                    # CLI entry point (commander setup)
+│   ├── types.ts                    # Error classes & shared interfaces
+│   ├── commands/
+│   │   ├── price.ts                # Direct CLI command handler
+│   │   └── interactive.ts          # Interactive REPL mode
+│   ├── services/
+│   │   ├── api.ts                  # Fallback orchestrator
+│   │   ├── httpErrors.ts           # Shared Axios error handler
+│   │   ├── coinMap.ts              # Symbol → CoinGecko ID mapping
+│   │   └── providers/
+│   │       ├── types.ts            # PriceProvider interface
+│   │       ├── coingecko.ts        # Provider #1
+│   │       ├── coinpaprika.ts      # Provider #2
+│   │       ├── coincap.ts          # Provider #3
+│   │       └── binance.ts          # Provider #4
+│   └── utils/
+│       ├── date.ts                 # Date parsing & timezone handling
+│       ├── format.ts               # Price formatting & diff calculation
+│       └── display.ts              # Terminal output with chalk
+├── tests/
+│   ├── coinMap.test.ts
+│   ├── date.test.ts
+│   └── format.test.ts
+├── bin/
+│   └── crypto-price.js             # Global bin entry point
+├── package.json
+└── tsconfig.json
+```
+
 ## License
 
 ISC

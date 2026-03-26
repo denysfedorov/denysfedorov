@@ -1,6 +1,40 @@
 # crypto-price-cli
 
-A terminal tool to check cryptocurrency prices and compare them with historical prices on any past date.
+```
+                                ___________
+                               /           \
+                              /    $ $ $    \
+                             |   ₿  ◈  ◎    |
+                              \    $ $ $    /
+                               \___________/
+                                    |||
+                                    |||
+        ┌─────────────────────────────────────────────────┐
+        │                                                 │
+        │    ██████╗██████╗ ██╗   ██╗██████╗ ████████╗    │
+        │   ██╔════╝██╔══██╗╚██╗ ██╔╝██╔══██╗╚══██╔══╝   │
+        │   ██║     ██████╔╝ ╚████╔╝ ██████╔╝   ██║      │
+        │   ██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║      │
+        │   ╚██████╗██║  ██║   ██║   ██║        ██║      │
+        │    ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝      │
+        │                                                 │
+        │            ██████╗ ██████╗ ██╗ ██████╗███████╗  │
+        │            ██╔══██╗██╔══██╗██║██╔════╝██╔════╝  │
+        │            ██████╔╝██████╔╝██║██║     █████╗    │
+        │            ██╔═══╝ ██╔══██╗██║██║     ██╔══╝    │
+        │            ██║     ██║  ██║██║╚██████╗███████╗  │
+        │            ╚═╝     ╚═╝  ╚═╝╚═╝ ╚═════╝╚══════╝  │
+        │                                                 │
+        │       ₿ Bitcoin    ◈ Ethereum    ◎ Solana        │
+        │       ▲ +3.59%     ▼ -1.82%     ▲ +12.4%        │
+        │                                                 │
+        └─────────────────────────────────────────────────┘
+
+   Track crypto prices & compare with historical data — right from your terminal.
+             5 free APIs · 38 coins · Interactive REPL · Zero config
+```
+
+> **One command. Real-time prices. Historical comparison. No API key needed.**
 
 ## Installation
 

@@ -79,6 +79,18 @@ describe('buildCompareTimestamp', () => {
     );
   });
 
+  it('throws for excessive timezone offset', () => {
+    expect(() => buildCompareTimestamp('2026-03-15', '10:00+99:99')).toThrow(
+      'Invalid timezone offset',
+    );
+  });
+
+  it('throws for offset minutes > 59', () => {
+    expect(() => buildCompareTimestamp('2026-03-15', '10:00+02:60')).toThrow(
+      'Invalid timezone offset',
+    );
+  });
+
   it('throws for future dates', () => {
     expect(() => buildCompareTimestamp('2026-12-01')).toThrow(
       'Date cannot be in the future',

@@ -70,7 +70,7 @@ export const cryptocompare: PriceProvider = {
       });
 
       const price = response.data?.[toCurrency(currency)];
-      if (price === undefined || price === 0) throw new CoinNotFoundError(coinId);
+      if (price == null || !Number.isFinite(price)) throw new CoinNotFoundError(coinId);
       return price;
     } catch (error) {
       handleAxiosError(error, 'CryptoCompare', coinId);
@@ -93,7 +93,7 @@ export const cryptocompare: PriceProvider = {
       });
 
       const price = response.data?.[fsym]?.[toCurrency(currency)];
-      if (price === undefined || price === 0) throw new NoPriceDataError(coinId);
+      if (price == null || !Number.isFinite(price)) throw new NoPriceDataError(coinId);
 
       return {
         price,

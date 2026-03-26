@@ -16,6 +16,11 @@ describe('formatPrice', () => {
     const result = formatPrice(0, 'usd');
     expect(result).toBe('$0.00');
   });
+
+  it('falls back gracefully for invalid currency code', () => {
+    const result = formatPrice(1234.56, 'zzz');
+    expect(result).toContain('1,234.56');
+  });
 });
 
 describe('calcDiff', () => {

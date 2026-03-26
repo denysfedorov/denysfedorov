@@ -42,7 +42,7 @@ export function buildCompareTimestamp(
 interface ParsedTime {
   hour: number;
   minute: number;
-  dayDelta: number; // -1, 0, or +1 for cross-midnight offsets
+  dayDelta: number; // Integer day offset from timezone conversion
 }
 
 /**
@@ -74,7 +74,17 @@ function parseTimeToUtc(timeStr: string): ParsedTime {
     const sign = match[4] === '+' ? -1 : 1; // +02:00 means subtract to get UTC
     const offsetH = parseInt(match[5], 10);
     const offsetM = parseInt(match[6], 10);
-    totalMinutes += sign * (offsetH * 60 + offsetM);
+
+    if (offsetM > 59) {
+      throw new Error('Invalid timezone offset. Minutes must be 0-59.');
+    }
+
+    const totalOffset = offsetH * 60 + offsetM;
+    if (totalOffset > 14 * 60) {
+      throw new Error('Invalid timezone offset. Max supported offset is ±14:00.');
+    }
+
+    totalMinutes += sign * totalOffset;
   }
 
   // Normalize to [0, 1439] and track day boundary crossings

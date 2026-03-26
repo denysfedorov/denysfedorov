@@ -7,7 +7,7 @@ import { ApiError } from '../types.js';
 
 export async function priceCommand(
   symbol: string,
-  options: { compare?: string; currency: string },
+  options: { compare?: string; time?: string; currency: string },
 ): Promise<void> {
   const coinId = resolveCoinId(symbol);
   if (!coinId) {
@@ -29,7 +29,7 @@ export async function priceCommand(
     if (options.compare) {
       let targetTs: number;
       try {
-        targetTs = buildCompareTimestamp(options.compare);
+        targetTs = buildCompareTimestamp(options.compare, options.time);
       } catch (err) {
         spinner.stop();
         renderError((err as Error).message);

@@ -15,8 +15,9 @@ program
     '-c, --compare <date>',
     'Compare with price on YYYY-MM-DD at current time',
   )
+  .option('-t, --time <time>', 'Time for comparison (e.g. 20:00+02:00, 18:00Z, 14:30)')
   .option('--currency <code>', 'Fiat currency code (default: usd)', 'usd')
-  .action(async (symbol: string | undefined, options: { compare?: string; currency: string }) => {
+  .action(async (symbol: string | undefined, options: { compare?: string; time?: string; currency: string }) => {
     if (!symbol) {
       await interactiveMode();
     } else {

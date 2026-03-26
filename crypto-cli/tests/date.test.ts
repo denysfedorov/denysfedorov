@@ -25,6 +25,42 @@ describe('buildCompareTimestamp', () => {
     expect(date.getUTCMinutes()).toBe(30);
   });
 
+  it('applies explicit time with timezone offset', () => {
+    const ts = buildCompareTimestamp('2026-03-15', '20:00+02:00');
+    const date = new Date(ts * 1000);
+    // 20:00 GMT+2 = 18:00 UTC
+    expect(date.getUTCHours()).toBe(18);
+    expect(date.getUTCMinutes()).toBe(0);
+  });
+
+  it('applies explicit UTC time', () => {
+    const ts = buildCompareTimestamp('2026-03-15', '15:45Z');
+    const date = new Date(ts * 1000);
+    expect(date.getUTCHours()).toBe(15);
+    expect(date.getUTCMinutes()).toBe(45);
+  });
+
+  it('applies plain time as UTC', () => {
+    const ts = buildCompareTimestamp('2026-03-15', '09:00');
+    const date = new Date(ts * 1000);
+    expect(date.getUTCHours()).toBe(9);
+    expect(date.getUTCMinutes()).toBe(0);
+  });
+
+  it('handles negative timezone offset', () => {
+    const ts = buildCompareTimestamp('2026-03-15', '10:00-05:00');
+    const date = new Date(ts * 1000);
+    // 10:00 EST = 15:00 UTC
+    expect(date.getUTCHours()).toBe(15);
+    expect(date.getUTCMinutes()).toBe(0);
+  });
+
+  it('throws for invalid time format', () => {
+    expect(() => buildCompareTimestamp('2026-03-15', 'abc')).toThrow(
+      'Invalid time format',
+    );
+  });
+
   it('throws for future dates', () => {
     expect(() => buildCompareTimestamp('2026-12-01')).toThrow(
       'Date cannot be in the future',

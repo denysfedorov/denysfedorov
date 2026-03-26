@@ -1,22 +1,40 @@
 {
-  "name": "crypto-cli",
+  "name": "crypto-price-cli",
   "version": "1.0.0",
   "description": "CLI tool to check crypto prices and compare with historical data",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "crypto-price": "./bin/crypto-price.ts"
+    "crypto-price": "./bin/crypto-price.js"
   },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run test && npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "crypto",
+    "cryptocurrency",
+    "bitcoin",
+    "price",
+    "cli"
+  ],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/denysfedorov/denysfedorov"
+  },
   "dependencies": {
     "@inquirer/prompts": "^8.3.2",
     "axios": "^1.13.6",

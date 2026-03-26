@@ -7,10 +7,11 @@ export function renderPriceOnly(
   coinName: string,
   price: number,
   currency: string,
+  provider?: string,
 ): void {
-  console.log(
-    `${chalk.bold(coinSymbol)} (${coinName}): ${chalk.cyan(formatPrice(price, currency))}`,
-  );
+  let line = `${chalk.bold(coinSymbol)} (${coinName}): ${chalk.cyan(formatPrice(price, currency))}`;
+  if (provider) line += chalk.gray(` via ${provider}`);
+  console.log(line);
 }
 
 export function renderPriceComparison(params: DisplayParams): void {
@@ -22,6 +23,7 @@ export function renderPriceComparison(params: DisplayParams): void {
     compareDate,
     compareTimeLabel,
     currency,
+    provider,
   } = params;
 
   const diff = calcDiff(currentPrice, historicalPrice);
@@ -39,9 +41,10 @@ export function renderPriceComparison(params: DisplayParams): void {
   const histLine = `Price on ${compareDate}:  ${formatPrice(historicalPrice, currency)}`;
   const diffLine = `Difference:       ${diffStr}`;
   const timeLine = `Compare time:     ${compareTimeLabel}`;
+  const providerLine = provider ? `Data source:      ${provider}` : '';
 
-  // Calculate box width
   const lines = [header, currentLine, histLine, diffLine, timeLine];
+  if (providerLine) lines.push(providerLine);
   const maxLen = Math.max(...lines.map((l) => l.length)) + 4;
 
   const top = `┌${'─'.repeat(maxLen)}┐`;
@@ -59,6 +62,9 @@ export function renderPriceComparison(params: DisplayParams): void {
   console.log(pad(`Price on ${compareDate}:  ${formatPrice(historicalPrice, currency)}`, histLine));
   console.log(pad(`Difference:       ${coloredDiff}`, diffLine));
   console.log(pad(`Compare time:     ${compareTimeLabel}`, timeLine));
+  if (provider) {
+    console.log(pad(`Data source:      ${chalk.gray(provider)}`, providerLine));
+  }
   console.log(bot);
 }
 

@@ -237,9 +237,43 @@ npx tsc --noEmit
 npm run build
 ```
 
-## Data Source
+## Data Sources
 
-All price data comes from the [CoinGecko API](https://www.coingecko.com/en/api) (free tier, no API key required). Rate limits apply (~10-30 calls/minute).
+The tool automatically cycles through multiple free APIs. If one provider is down, rate-limited, or unreachable, it falls back to the next one — no configuration needed.
+
+| Priority | Provider     | API Key | Rate Limit         | Currencies | Notes                          |
+|----------|-------------|---------|--------------------|-----------|---------------------------------|
+| 1        | [CoinGecko](https://www.coingecko.com/en/api)   | No      | ~30 req/min        | All fiat  | Best historical data           |
+| 2        | [CoinPaprika](https://api.coinpaprika.com/)      | No      | ~1,000 req/day     | USD only  | 1yr daily historical (free)    |
+| 3        | [CoinCap](https://docs.coincap.io/)              | No      | 200 req/min        | USD only  | 15-min interval historical     |
+| 4        | [Binance](https://binance-docs.github.io/apidocs/) | No    | 1,200 req/min      | USD/EUR/GBP | 1h kline historical         |
+
+The output shows which provider served the data:
+
+```
+BTC (Bitcoin): $67,432.18 via CoinGecko
+```
+
+```
+┌───────────────────────────────────────────────┐
+│  ETH (Ethereum)                               │
+├───────────────────────────────────────────────┤
+│  Current price:    $2,085.50                  │
+│  Price on 2026-03-25:  $2,008.75              │
+│  Difference:       +$76.75 (+3.82%) ▲         │
+│  Compare time:     Mar 25, 2026 at 18:00 UTC  │
+│  Data source:      CoinGecko                  │
+└───────────────────────────────────────────────┘
+```
+
+**How fallback works:**
+1. Tries CoinGecko first (best data quality, supports all currencies)
+2. If CoinGecko fails (429 rate limit, timeout, network error), tries CoinPaprika
+3. If CoinPaprika fails, tries CoinCap
+4. If CoinCap fails, tries Binance
+5. If all fail, shows a combined error message
+
+Non-USD currencies will skip providers that only support USD (CoinPaprika, CoinCap) and try the next one automatically.
 
 ## License
 

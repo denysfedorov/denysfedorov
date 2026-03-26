@@ -1,91 +1,66 @@
-import axios, { AxiosError } from 'axios';
-import {
-  RateLimitError,
-  CoinNotFoundError,
-  NetworkError,
-  NoPriceDataError,
-  ApiError,
-} from '../types.js';
+import { coingecko } from './providers/coingecko.js';
+import { coincap } from './providers/coincap.js';
+import { coinpaprika } from './providers/coinpaprika.js';
+import { binance } from './providers/binance.js';
+import { CoinNotFoundError, NoPriceDataError } from '../types.js';
+import type { PriceProvider } from './providers/types.js';
 
-const BASE_URL = 'https://api.coingecko.com/api/v3';
-
-function handleAxiosError(error: unknown, coinId?: string): never {
-  if (error instanceof AxiosError) {
-    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED' || !error.response) {
-      throw new NetworkError();
-    }
-    const status = error.response.status;
-    if (status === 429) throw new RateLimitError();
-    if (status === 404) throw new CoinNotFoundError(coinId ?? 'unknown');
-    throw new ApiError(`CoinGecko API error (HTTP ${status}). Try again later.`, status);
-  }
-  throw error;
-}
+// Ordered by preference: CoinGecko first, then fallbacks
+const providers: PriceProvider[] = [coingecko, coinpaprika, coincap, binance];
 
 export async function getCurrentPrice(
   coinId: string,
   currency: string,
-): Promise<number> {
-  try {
-    const response = await axios.get(`${BASE_URL}/simple/price`, {
-      params: {
-        ids: coinId,
-        vs_currencies: currency,
-      },
-    });
+): Promise<{ price: number; provider: string }> {
+  const errors: { provider: string; message: string }[] = [];
 
-    const price = response.data?.[coinId]?.[currency];
-    if (price === undefined) {
-      throw new CoinNotFoundError(coinId);
+  for (const provider of providers) {
+    try {
+      const price = await provider.getCurrentPrice(coinId, currency);
+      return { price, provider: provider.name };
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      errors.push({ provider: provider.name, message: msg });
+
+      // Don't try other providers if the coin simply doesn't exist
+      if (error instanceof CoinNotFoundError) throw error;
+
+      // Continue to next provider for rate limits, network errors, etc.
     }
-
-    return price;
-  } catch (error) {
-    if (error instanceof ApiError) throw error;
-    handleAxiosError(error, coinId);
   }
+
+  throw new Error(
+    `All providers failed:\n${errors.map((e) => `  ${e.provider}: ${e.message}`).join('\n')}`,
+  );
 }
 
 export async function getHistoricalPrice(
   coinId: string,
   targetTimestamp: number,
   currency: string,
-): Promise<{ price: number; actualTimestamp: number }> {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/coins/${coinId}/market_chart/range`,
-      {
-        params: {
-          vs_currency: currency,
-          from: targetTimestamp - 3600,
-          to: targetTimestamp + 3600,
-        },
-      },
-    );
+): Promise<{ price: number; actualTimestamp: number; provider: string }> {
+  const errors: { provider: string; message: string }[] = [];
 
-    const prices: [number, number][] = response.data?.prices;
-    if (!prices || prices.length === 0) {
-      throw new NoPriceDataError(coinId);
+  for (const provider of providers) {
+    try {
+      const result = await provider.getHistoricalPrice(
+        coinId,
+        targetTimestamp,
+        currency,
+      );
+      return { ...result, provider: provider.name };
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      errors.push({ provider: provider.name, message: msg });
+
+      if (error instanceof CoinNotFoundError) throw error;
+      if (error instanceof NoPriceDataError) throw error;
     }
-
-    const targetMs = targetTimestamp * 1000;
-    let closest = prices[0];
-    let closestDiff = Math.abs(prices[0][0] - targetMs);
-
-    for (const point of prices) {
-      const diff = Math.abs(point[0] - targetMs);
-      if (diff < closestDiff) {
-        closest = point;
-        closestDiff = diff;
-      }
-    }
-
-    return {
-      price: closest[1],
-      actualTimestamp: closest[0] / 1000,
-    };
-  } catch (error) {
-    if (error instanceof ApiError) throw error;
-    handleAxiosError(error, coinId);
   }
+
+  throw new Error(
+    `All providers failed:\n${errors.map((e) => `  ${e.provider}: ${e.message}`).join('\n')}`,
+  );
 }
+
+export { providers };

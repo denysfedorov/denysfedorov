@@ -17,14 +17,14 @@ export async function priceCommand(
     );
     renderError(`Supported: ${getSupportedSymbols().join(', ')}`);
     process.exit(1);
-    return; // unreachable but helps TS
+    return;
   }
 
   const coinName = getCoinName(coinId);
   const spinner = ora(`Fetching ${symbol.toUpperCase()} price...`).start();
 
   try {
-    const currentPrice = await getCurrentPrice(coinId, options.currency);
+    const current = await getCurrentPrice(coinId, options.currency);
 
     if (options.compare) {
       let targetTs: number;
@@ -48,15 +48,16 @@ export async function priceCommand(
       renderPriceComparison({
         coinSymbol: symbol.toUpperCase(),
         coinName,
-        currentPrice,
+        currentPrice: current.price,
         historicalPrice: historical.price,
         compareDate: options.compare,
         compareTimeLabel: formatDateLabel(historical.actualTimestamp),
         currency: options.currency,
+        provider: current.provider,
       });
     } else {
       spinner.stop();
-      renderPriceOnly(symbol.toUpperCase(), coinName, currentPrice, options.currency);
+      renderPriceOnly(symbol.toUpperCase(), coinName, current.price, options.currency, current.provider);
     }
   } catch (error) {
     spinner.stop();
@@ -64,7 +65,7 @@ export async function priceCommand(
     if (error instanceof ApiError) {
       renderError(error.message);
     } else {
-      renderError('An unexpected error occurred.');
+      renderError((error as Error).message);
     }
     process.exit(1);
   }

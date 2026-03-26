@@ -10,21 +10,21 @@ export class ApiError extends Error {
 
 export class RateLimitError extends ApiError {
   constructor() {
-    super('Rate limited by CoinGecko. Wait 60 seconds and try again.', 429);
+    super('Rate limited. Wait 60 seconds and try again.', 429);
     this.name = 'RateLimitError';
   }
 }
 
 export class CoinNotFoundError extends ApiError {
   constructor(coinId: string) {
-    super(`Coin "${coinId}" not found on CoinGecko.`, 404);
+    super(`Coin "${coinId}" not found.`, 404);
     this.name = 'CoinNotFoundError';
   }
 }
 
 export class NetworkError extends ApiError {
   constructor() {
-    super("Can't reach CoinGecko. Check your internet connection.");
+    super("Can't reach price API. Check your internet connection.");
     this.name = 'NetworkError';
   }
 }
@@ -52,4 +52,5 @@ export interface DisplayParams {
   compareDate: string;
   compareTimeLabel: string;
   currency: string;
+  provider?: string;
 }

@@ -84,7 +84,7 @@ async function runOnce(): Promise<void> {
   const spinner = ora(`Fetching ${symbol.toUpperCase()} price...`).start();
 
   try {
-    const currentPrice = await getCurrentPrice(coinId, currency);
+    const current = await getCurrentPrice(coinId, currency);
 
     if (compareDate) {
       const targetTs = buildCompareTimestamp(compareDate);
@@ -94,22 +94,23 @@ async function runOnce(): Promise<void> {
       renderPriceComparison({
         coinSymbol: symbol.toUpperCase(),
         coinName,
-        currentPrice,
+        currentPrice: current.price,
         historicalPrice: historical.price,
         compareDate,
         compareTimeLabel: formatDateLabel(historical.actualTimestamp),
         currency,
+        provider: current.provider,
       });
     } else {
       spinner.stop();
-      renderPriceOnly(symbol.toUpperCase(), coinName, currentPrice, currency);
+      renderPriceOnly(symbol.toUpperCase(), coinName, current.price, currency, current.provider);
     }
   } catch (error) {
     spinner.stop();
     if (error instanceof ApiError) {
       renderError(error.message);
     } else {
-      renderError('An unexpected error occurred.');
+      renderError((error as Error).message);
     }
   }
 }

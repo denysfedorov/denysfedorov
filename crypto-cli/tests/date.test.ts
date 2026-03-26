@@ -55,6 +55,24 @@ describe('buildCompareTimestamp', () => {
     expect(date.getUTCMinutes()).toBe(0);
   });
 
+  it('handles cross-midnight timezone (rolls back to previous day)', () => {
+    // 00:30 GMT+2 = 22:30 UTC on the previous day
+    const ts = buildCompareTimestamp('2026-03-15', '00:30+02:00');
+    const date = new Date(ts * 1000);
+    expect(date.getUTCDate()).toBe(14); // previous day
+    expect(date.getUTCHours()).toBe(22);
+    expect(date.getUTCMinutes()).toBe(30);
+  });
+
+  it('handles cross-midnight timezone (rolls forward to next day)', () => {
+    // 23:30 GMT-2 = 01:30 UTC on the next day
+    const ts = buildCompareTimestamp('2026-03-15', '23:30-02:00');
+    const date = new Date(ts * 1000);
+    expect(date.getUTCDate()).toBe(16); // next day
+    expect(date.getUTCHours()).toBe(1);
+    expect(date.getUTCMinutes()).toBe(30);
+  });
+
   it('throws for invalid time format', () => {
     expect(() => buildCompareTimestamp('2026-03-15', 'abc')).toThrow(
       'Invalid time format',

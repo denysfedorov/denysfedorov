@@ -25,24 +25,31 @@ export function buildCompareTimestamp(
     throw new Error("That's today — nothing to compare. Pick a past date.");
   }
 
-  let withTime: dayjs.Dayjs;
-
   if (timeStr) {
-    const utcMinutes = parseTimeToUtcMinutes(timeStr);
-    withTime = parsed.hour(Math.floor(utcMinutes / 60)).minute(utcMinutes % 60).second(0);
-  } else {
-    withTime = parsed.hour(now.hour()).minute(now.minute()).second(0);
+    const result = parseTimeToUtc(timeStr);
+    const adjusted = parsed
+      .add(result.dayDelta, 'day')
+      .hour(result.hour)
+      .minute(result.minute)
+      .second(0);
+    return adjusted.unix();
   }
 
-  return withTime.unix();
+  const withCurrentTime = parsed.hour(now.hour()).minute(now.minute()).second(0);
+  return withCurrentTime.unix();
+}
+
+interface ParsedTime {
+  hour: number;
+  minute: number;
+  dayDelta: number; // -1, 0, or +1 for cross-midnight offsets
 }
 
 /**
  * Parse a time string like "20:00", "20:00+02:00", "18:00Z" into
- * total minutes from midnight UTC.
+ * UTC hour/minute with a day delta for cross-midnight cases.
  */
-function parseTimeToUtcMinutes(timeStr: string): number {
-  // Match HH:MM with optional timezone offset like +02:00, -05:30, or Z
+function parseTimeToUtc(timeStr: string): ParsedTime {
   const match = timeStr.match(
     /^(\d{1,2}):(\d{2})(?:(Z)|([+-])(\d{1,2}):(\d{2}))?$/,
   );
@@ -69,12 +76,22 @@ function parseTimeToUtcMinutes(timeStr: string): number {
     const offsetM = parseInt(match[6], 10);
     totalMinutes += sign * (offsetH * 60 + offsetM);
   }
-  // No timezone specified → treat as UTC
 
-  // Wrap around midnight
-  totalMinutes = ((totalMinutes % 1440) + 1440) % 1440;
+  // Handle cross-midnight day boundaries
+  let dayDelta = 0;
+  if (totalMinutes < 0) {
+    dayDelta = -1;
+    totalMinutes += 1440;
+  } else if (totalMinutes >= 1440) {
+    dayDelta = 1;
+    totalMinutes -= 1440;
+  }
 
-  return totalMinutes;
+  return {
+    hour: Math.floor(totalMinutes / 60),
+    minute: totalMinutes % 60,
+    dayDelta,
+  };
 }
 
 export function formatDateLabel(timestamp: number): string {

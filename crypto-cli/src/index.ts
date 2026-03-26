@@ -25,4 +25,11 @@ program
     }
   });
 
-program.parse();
+async function main() {
+  await program.parseAsync(process.argv);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

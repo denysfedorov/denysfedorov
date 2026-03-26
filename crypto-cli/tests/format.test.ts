@@ -39,6 +39,21 @@ describe('calcDiff', () => {
     expect(diff.percent).toBe(0);
     expect(diff.direction).toBe('flat');
   });
+
+  it('handles zero historical price without NaN/Infinity', () => {
+    const diff = calcDiff(100, 0);
+    expect(diff.absolute).toBe(100);
+    expect(diff.percent).toBe(0);
+    expect(diff.direction).toBe('up');
+    expect(Number.isFinite(diff.percent)).toBe(true);
+  });
+
+  it('handles both zero without NaN', () => {
+    const diff = calcDiff(0, 0);
+    expect(diff.absolute).toBe(0);
+    expect(diff.percent).toBe(0);
+    expect(diff.direction).toBe('flat');
+  });
 });
 
 describe('formatDiff', () => {

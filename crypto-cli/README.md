@@ -248,8 +248,8 @@ The tool provides clear, human-friendly errors:
 | Invalid date format           | `✖ Invalid date format. Use YYYY-MM-DD.`                        |
 | Future date                   | `✖ Date cannot be in the future.`                                |
 | Today's date                  | `✖ That's today — nothing to compare. Pick a past date.`        |
-| No internet                   | `✖ Can't reach CoinGecko. Check your internet connection.`      |
-| API rate limited              | `✖ Rate limited by CoinGecko. Wait 60 seconds and try again.`   |
+| No internet                   | `✖ Can't reach price API. Check your internet connection.`      |
+| API rate limited              | `✖ Rate limited. Wait 60 seconds and try again.`                |
 | Coin didn't exist on that date| `✖ No price data for PEPE. The coin may not have existed yet.`   |
 
 ## Development

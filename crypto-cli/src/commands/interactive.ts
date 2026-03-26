@@ -99,7 +99,10 @@ async function runOnce(): Promise<void> {
         compareDate,
         compareTimeLabel: formatDateLabel(historical.actualTimestamp),
         currency,
-        provider: current.provider,
+        provider:
+          current.provider === historical.provider
+            ? current.provider
+            : `${current.provider} (current), ${historical.provider} (historical)`,
       });
     } else {
       spinner.stop();

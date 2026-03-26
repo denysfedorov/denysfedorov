@@ -53,7 +53,10 @@ export async function priceCommand(
         compareDate: options.compare,
         compareTimeLabel: formatDateLabel(historical.actualTimestamp),
         currency: options.currency,
-        provider: current.provider,
+        provider:
+          current.provider === historical.provider
+            ? current.provider
+            : `${current.provider} (current), ${historical.provider} (historical)`,
       });
     } else {
       spinner.stop();

@@ -11,13 +11,19 @@ export function formatPrice(amount: number, currency: string): string {
 
 export function calcDiff(current: number, historical: number): PriceDiff {
   const absolute = current - historical;
-  const percent = ((current - historical) / historical) * 100;
-  const roundedPercent = Math.round(percent * 100) / 100;
+
+  if (historical === 0) {
+    const direction: 'up' | 'down' | 'flat' =
+      absolute > 0 ? 'up' : absolute < 0 ? 'down' : 'flat';
+    return { absolute, percent: 0, direction };
+  }
+
+  const percent = Math.round(((current - historical) / historical) * 10000) / 100;
 
   let direction: 'up' | 'down' | 'flat';
-  if (roundedPercent > 0) {
+  if (percent > 0) {
     direction = 'up';
-  } else if (roundedPercent < 0) {
+  } else if (percent < 0) {
     direction = 'down';
   } else {
     direction = 'flat';

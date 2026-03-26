@@ -1,12 +1,13 @@
 import { coingecko } from './providers/coingecko.js';
+import { cryptocompare } from './providers/cryptocompare.js';
 import { coincap } from './providers/coincap.js';
 import { coinpaprika } from './providers/coinpaprika.js';
 import { binance } from './providers/binance.js';
 import { CoinNotFoundError, NoPriceDataError } from '../types.js';
 import type { PriceProvider } from './providers/types.js';
 
-// Ordered by preference: CoinGecko first, then fallbacks
-const providers: PriceProvider[] = [coingecko, coinpaprika, coincap, binance];
+// Ordered by preference: best data quality first, then fallbacks
+const providers: PriceProvider[] = [coingecko, cryptocompare, coinpaprika, coincap, binance];
 
 export async function getCurrentPrice(
   coinId: string,

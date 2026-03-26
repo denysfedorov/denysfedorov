@@ -244,9 +244,10 @@ The tool automatically cycles through multiple free APIs. If one provider is dow
 | Priority | Provider     | API Key | Rate Limit         | Currencies | Notes                          |
 |----------|-------------|---------|--------------------|-----------|---------------------------------|
 | 1        | [CoinGecko](https://www.coingecko.com/en/api)   | No      | ~30 req/min        | All fiat  | Best historical data           |
-| 2        | [CoinPaprika](https://api.coinpaprika.com/)      | No      | ~1,000 req/day     | USD only  | 1yr daily historical (free)    |
-| 3        | [CoinCap](https://docs.coincap.io/)              | No      | 200 req/min        | USD only  | 15-min interval historical     |
-| 4        | [Binance](https://binance-docs.github.io/apidocs/) | No    | 1,200 req/min      | USD/EUR/GBP | 1h kline historical         |
+| 2        | [CryptoCompare](https://min-api.cryptocompare.com/) | No  | ~100K req/month    | All fiat  | Direct timestamp lookup        |
+| 3        | [CoinPaprika](https://api.coinpaprika.com/)      | No      | ~1,000 req/day     | USD only  | 1yr daily historical (free)    |
+| 4        | [CoinCap](https://docs.coincap.io/)              | No      | 200 req/min        | USD only  | 15-min interval historical     |
+| 5        | [Binance](https://binance-docs.github.io/apidocs/) | No    | 1,200 req/min      | USD/EUR/GBP | 1h kline historical         |
 
 The output shows which provider served the data:
 
@@ -268,10 +269,11 @@ BTC (Bitcoin): $67,432.18 via CoinGecko
 
 **How fallback works:**
 1. Tries CoinGecko first (best data quality, supports all currencies)
-2. If CoinGecko fails (429 rate limit, timeout, network error), tries CoinPaprika
-3. If CoinPaprika fails, tries CoinCap
-4. If CoinCap fails, tries Binance
-5. If all fail, shows a combined error message
+2. If CoinGecko fails (429 rate limit, timeout, network error), tries CryptoCompare
+3. If CryptoCompare fails, tries CoinPaprika
+4. If CoinPaprika fails, tries CoinCap
+5. If CoinCap fails, tries Binance
+6. If all fail, shows a combined error message
 
 Non-USD currencies will skip providers that only support USD (CoinPaprika, CoinCap) and try the next one automatically.
 
@@ -367,18 +369,21 @@ flowchart TD
 flowchart LR
     A[API Request] --> P1[CoinGecko]
     P1 -- Success --> R([Return result])
-    P1 -- "Fail (429/timeout/network)" --> P2[CoinPaprika]
+    P1 -- "Fail (429/timeout/network)" --> P2[CryptoCompare]
     P2 -- Success --> R
-    P2 -- Fail --> P3[CoinCap]
+    P2 -- Fail --> P3[CoinPaprika]
     P3 -- Success --> R
-    P3 -- Fail --> P4[Binance]
+    P3 -- Fail --> P4[CoinCap]
     P4 -- Success --> R
-    P4 -- Fail --> ERR([All providers failed])
+    P4 -- Fail --> P5[Binance]
+    P5 -- Success --> R
+    P5 -- Fail --> ERR([All providers failed])
 
     style P1 fill:#8BC34A,color:#fff
-    style P2 fill:#FF9800,color:#fff
-    style P3 fill:#03A9F4,color:#fff
-    style P4 fill:#FFC107,color:#000
+    style P2 fill:#2196F3,color:#fff
+    style P3 fill:#FF9800,color:#fff
+    style P4 fill:#03A9F4,color:#fff
+    style P5 fill:#FFC107,color:#000
     style R fill:#4CAF50,color:#fff
     style ERR fill:#f44336,color:#fff
 ```
@@ -400,9 +405,10 @@ crypto-cli/
 │   │   └── providers/
 │   │       ├── types.ts            # PriceProvider interface
 │   │       ├── coingecko.ts        # Provider #1
-│   │       ├── coinpaprika.ts      # Provider #2
-│   │       ├── coincap.ts          # Provider #3
-│   │       └── binance.ts          # Provider #4
+│   │       ├── cryptocompare.ts    # Provider #2
+│   │       ├── coinpaprika.ts      # Provider #3
+│   │       ├── coincap.ts          # Provider #4
+│   │       └── binance.ts          # Provider #5
 │   └── utils/
 │       ├── date.ts                 # Date parsing & timezone handling
 │       ├── format.ts               # Price formatting & diff calculation

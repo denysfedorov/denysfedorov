@@ -95,7 +95,9 @@ export function getSupportedSymbols(): string[] {
 }
 
 export function findClosestSymbol(input: string): string | null {
-  const lower = input.toLowerCase();
+  const lower = input.trim().toLowerCase();
+  if (!lower) return null;
+
   const symbols = Object.keys(COIN_MAP);
 
   // Exact prefix match

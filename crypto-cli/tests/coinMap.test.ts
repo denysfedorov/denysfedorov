@@ -52,4 +52,9 @@ describe('findClosestSymbol', () => {
   it('returns null for completely unrelated input', () => {
     expect(findClosestSymbol('zzzzzzz')).toBeNull();
   });
+
+  it('returns null for empty input', () => {
+    expect(findClosestSymbol('')).toBeNull();
+    expect(findClosestSymbol('  ')).toBeNull();
+  });
 });

@@ -16,7 +16,7 @@ export async function priceCommand(
       `Unknown coin "${symbol}".${suggestion ? ` Did you mean "${suggestion}"?` : ''}`,
     );
     renderError(`Supported: ${getSupportedSymbols().join(', ')}`);
-    process.exit(1);
+    process.exitCode = 1;
     return;
   }
 
@@ -33,7 +33,7 @@ export async function priceCommand(
       } catch (err) {
         spinner.stop();
         renderError((err as Error).message);
-        process.exit(1);
+        process.exitCode = 1;
         return;
       }
 
@@ -70,6 +70,6 @@ export async function priceCommand(
     } else {
       renderError((error as Error).message);
     }
-    process.exit(1);
+    process.exitCode = 1;
   }
 }

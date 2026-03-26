@@ -21,6 +21,7 @@ program
     if (!symbol) {
       await interactiveMode();
     } else {
+      options.currency = options.currency.toLowerCase();
       await priceCommand(symbol, options);
     }
   });

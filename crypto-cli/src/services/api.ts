@@ -7,15 +7,16 @@ import { CoinNotFoundError, NoPriceDataError } from '../types.js';
 import type { PriceProvider } from './providers/types.js';
 
 // Ordered by preference: best data quality first, then fallbacks
-const providers: PriceProvider[] = [coingecko, cryptocompare, coinpaprika, coincap, binance];
+const defaultProviders: PriceProvider[] = [coingecko, cryptocompare, coinpaprika, coincap, binance];
 
 export async function getCurrentPrice(
   coinId: string,
   currency: string,
+  providerList: PriceProvider[] = defaultProviders,
 ): Promise<{ price: number; provider: string }> {
   const errors: { provider: string; message: string }[] = [];
 
-  for (const provider of providers) {
+  for (const provider of providerList) {
     try {
       const price = await provider.getCurrentPrice(coinId, currency);
       return { price, provider: provider.name };
@@ -39,10 +40,11 @@ export async function getHistoricalPrice(
   coinId: string,
   targetTimestamp: number,
   currency: string,
+  providerList: PriceProvider[] = defaultProviders,
 ): Promise<{ price: number; actualTimestamp: number; provider: string }> {
   const errors: { provider: string; message: string }[] = [];
 
-  for (const provider of providers) {
+  for (const provider of providerList) {
     try {
       const result = await provider.getHistoricalPrice(
         coinId,
@@ -64,4 +66,4 @@ export async function getHistoricalPrice(
   );
 }
 
-export { providers };
+export { defaultProviders as providers };

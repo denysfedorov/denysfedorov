@@ -77,15 +77,9 @@ function parseTimeToUtc(timeStr: string): ParsedTime {
     totalMinutes += sign * (offsetH * 60 + offsetM);
   }
 
-  // Handle cross-midnight day boundaries
-  let dayDelta = 0;
-  if (totalMinutes < 0) {
-    dayDelta = -1;
-    totalMinutes += 1440;
-  } else if (totalMinutes >= 1440) {
-    dayDelta = 1;
-    totalMinutes -= 1440;
-  }
+  // Normalize to [0, 1439] and track day boundary crossings
+  let dayDelta = Math.floor(totalMinutes / 1440);
+  totalMinutes = ((totalMinutes % 1440) + 1440) % 1440;
 
   return {
     hour: Math.floor(totalMinutes / 60),

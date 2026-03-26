@@ -31,7 +31,7 @@
         └─────────────────────────────────────────────────┘
 
    Track crypto prices & compare with historical data — right from your terminal.
-             5 free APIs · 38 coins · Interactive REPL · Zero config
+             5 free APIs · 39 coins · Interactive REPL · Zero config
 ```
 
 > **One command. Real-time prices. Historical comparison. No API key needed.**
@@ -202,7 +202,7 @@ $ crypto-price sol --compare 2025-01-15 --currency eur
 
 ## Supported Cryptocurrencies
 
-The tool supports 38 popular coins out of the box:
+The tool supports 39 popular coins out of the box:
 
 | Symbol | Name              | Symbol | Name              |
 |--------|-------------------|--------|-------------------|

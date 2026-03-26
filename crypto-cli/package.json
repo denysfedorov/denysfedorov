@@ -1,0 +1,33 @@
+{
+  "name": "crypto-cli",
+  "version": "1.0.0",
+  "description": "CLI tool to check crypto prices and compare with historical data",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "crypto-price": "./bin/crypto-price.ts"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.13.6",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.3",
+    "dayjs": "^1.11.20",
+    "ora": "^9.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  }
+}
